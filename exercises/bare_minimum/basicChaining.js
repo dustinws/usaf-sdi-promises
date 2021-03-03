@@ -15,22 +15,25 @@ const { getGitHubProfileAsync } = require('./promisification');
 const { pluckFirstLineFromFileAsync } = require('./promiseConstructor');
 
 
-const writeJSONFile = (filePath) => (data) =>
-  new Promise((resolve, reject) => {
-    fs.writeFile(filePath, JSON.stringify(data), (error) => {
-      if (error) {
-        return reject(error);
-      }
+function writeFileJSON(filePath) {
+  return function (data) {
+    return new Promise((resolve, reject) => {
+      fs.writeFile(filePath, JSON.stringify(data), (error) => {
+        if (error) {
+          return reject(error);
+        }
 
-      return resolve(data);
+        return resolve(data);
+      });
     });
-  });
+  };
+}
 
 
 var fetchProfileAndWriteToFile = function(readFilePath, writeFilePath) {
   return pluckFirstLineFromFileAsync(readFilePath)
     .then(getGitHubProfileAsync)
-    .then(writeJSONFile(writeFilePath))
+    .then(writeFileJSON(writeFilePath))
 };
 
 // Export these functions so we can test them
